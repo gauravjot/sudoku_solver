@@ -9,6 +9,9 @@ sample_board = [
    ["0","0","0","4","1","9","0","0","5"],
    ["0","0","0","0","8","0","0","7","9"]]
 
+# Dictionary of tuple as key and value
+# eg. { (0,2): ('1','2',), }
+# (0,2) is field on board; ('1','2',) are tried values in that spot
 solved_fields = {}
 
 def main():
@@ -20,57 +23,50 @@ def solve():
     empty_fields = find_empty_fields(sample_board)
     index = 0
     while index < len(empty_fields):
+        # success tells if we successfully found value or not
         success = False
-        fld = empty_fields[index]
-        # print(fld, end=" => ")
+
+        # current field we are working on, format: tuple eg. (0,2)
+        current_field = empty_fields[index]
+
         for i in range(1,10): 
-            if fld in solved_fields.keys():
-                previously_solved_values = solved_fields[fld]
-                # print(("$$ at {}").format(str(i)), end=" -- ")
-                # print(previously_solved_values)
-                if str(i) in previously_solved_values:
-                    # print("continue called {}".format(str(i)))
+            if current_field in solved_fields.keys():
+                if str(i) in solved_fields[current_field]:
                     if (i==9):
-                        del solved_fields[fld]
-                        index -= 1
-                        remove_number(sample_board,fld)
-                        success = True
+                        # 9 is last possible value but already in solved_fields
+                        # hence no possible solution and we have to back-track
+                        del solved_fields[current_field]
+                        remove_number(sample_board,current_field)
                     continue
-            if(is_valid(sample_board,str(i),fld)):
-                # print("success at {}".format(str(i)))
-                insert_number(sample_board,str(i),fld)
+            if(is_valid(sample_board,str(i),current_field)):
+                insert_number(sample_board,str(i),current_field)
                 success = True
                 index += 1
                 break
             else:
-                if fld in solved_fields.keys() and i == 9:
-                    del solved_fields[fld]
-                    remove_number(sample_board,fld)
+                if current_field in solved_fields.keys() and i == 9:
+                    # 9 was last possible value but is not valid
+                    # we need to back-track
+                    del solved_fields[current_field]
+                    remove_number(sample_board,current_field)
                     break
-                # else:
-                #     print("failed at {}".format(str(i)), end=" -- ")
-                #     if i==9:
-                #         print("")
             
         if success == False:
-            # need to back track
+            # back-tracking because we did not have success
             index -=1
 
-    print(sample_board)
-
+    show_board(sample_board)
 
 def is_valid(board, number, key):
     number = remove_astericks(number)
 
     # Check Row
     if number in board[key[0]] or '*'+number in board[key[0]]:
-        # print("row failed", end=" -- ")
         return False
     
     #Check Column
     for i in board:
         if number == remove_astericks(i[key[1]]):
-            # print("column failed", end=" -- ")
             return False
 
     #Check Box
@@ -79,7 +75,6 @@ def is_valid(board, number, key):
     for i in range(box_start[0],box_end[0] + 1):
         for j in range(box_start[1],box_end[1] + 1):
             if number == remove_astericks(board[i][j]):
-                # print("box failed", end=" -- ")
                 return False
     
     return True
@@ -88,17 +83,16 @@ def insert_number(board, number, key):
     global solved_fields
     board[key[0]][key[1]] = '*'+str(number)
     if key in solved_fields:
-        solved_field_values = solved_fields[key]
-        solved_fields[key] = solved_field_values + tuple(number)
+        solved_fields[key] = solved_fields[key] + tuple(number)
     else:
         solved_fields[key] = tuple(number)
 
 def remove_number(board,key):
     global solved_fields
     board[key[0]][key[1]] = '0'
-    # del solved_fields[key]
 
 def find_empty_fields(board):
+    # eg. [(0,2),(0,3),...]
     empty_fields = []
     for row, i in enumerate(board):
         for col, j in enumerate(i):
@@ -110,20 +104,21 @@ def find_empty_fields(board):
 def remove_astericks(string):
     return string.replace("*","")
 
-print(sample_board)     
+def show_board(board):
+    print("\n")
+    for index,i in enumerate(board):
+        if(index%3 == 0 and index != 0):
+            print("---------------------------------")
+        for indexj,j in enumerate(i):
+            if(indexj%3 == 0 and indexj!= 0):
+                print(" | ", end="")
+            if(j.startswith("*")):
+                print(j,end=" ")
+            else:
+                print(" "+j, end=" ")
+        print("")
+    print("\n")
+
+
+show_board(sample_board)     
 main()
-
-# print(sample_board)
-
-# if(is_valid(sample_board,'1',(5,2))):
-#     insert_number(sample_board,'1',(5,2))
-# else:
-#     print("no luck")
-
-# if(is_valid(sample_board,'3',(5,2))):
-#     insert_number(sample_board,'3',(5,2))
-# else:
-#     print("no luck")
-
-# print(solved_fields)
-# print(sample_board)
