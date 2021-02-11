@@ -8,7 +8,7 @@ This program solves Sudoku problems by trying values in top to bottom and left t
 * `def find_empty_fields(board)`\
 This functions finds all the empty or `"0"` fields in given Sudoku board and returns their position in format of `(row, col)` tuple.
 
-<br/>* `def is_valid(board, number, key)`
+<br/>* `def is_valid(board, number, key)`\
 The function takes a key which is the position on Sudoku board we are working on, a number which we are trying to see if is a valid fit for position and finally board itself. Returns `True` if number in position is valid or `False` if not.
 
 <br/>* `def insert_number(board, number, key)`\
